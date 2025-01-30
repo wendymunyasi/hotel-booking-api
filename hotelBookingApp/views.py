@@ -3,12 +3,17 @@ ViewSets automatically provides `list`, `create`, `retrieve`,
 `update` and `destroy` actions.
 """
 
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db.models import Q
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 from .models import Room, Booking
-from .serializers import BookingSerializer, RoomSerializer
+from .serializers import BookingSerializer, RoomSerializer, UserRegistrationSerializer
+from .permissions import IsOwner
 
 class RoomViewSet(viewsets.ModelViewSet):
     """A simple viewSet for viewing rooms
@@ -50,3 +55,72 @@ class RoomViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+
+class BoookingViewSet(viewsets.ModelViewSet):
+    """A simple viewSet for viewing Bookings
+    """
+    queryset = Booking.objects.all() # pylint: disable=no-member
+    serializer_class = BookingSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwner] # Only logged-in users can book
+    # permission_classes = [permissions.AllowAny]
+
+    def create_booking(self, serializer):
+        """Create a new booking and associate it with the logged-in user
+        """
+        # Automatically associate the booking with the logged-in user
+        serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        """View all bookings for the logged-in user
+        """
+        # Allow users to view only their own bookings
+        return self.queryset.filter(user=self.request.user)
+
+# Login View
+class LoginView(ObtainAuthToken):
+    """
+    View to handle user login and return an authentication token.
+    """
+    def post(self, request, *args, **kwargs):
+        """Generate and return an authentication token for the user
+        """
+        response = super().post(request, *args, **kwargs)
+        token = Token.objects.get(key=response.data['token']) # pylint: disable=no-member
+        return Response(
+            {
+                'token': token.key,
+                'user_id': token.user_id,
+                'username': token.user.username
+            }
+        )
+
+# Logout View
+class LogoutView(APIView):
+    """
+    View to handle user logout by deleting their authentication token.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """Delete the user's authentication token
+        """
+        request.user.auth_token.delete()
+        return Response({"message": "Logged out successfully."})
+
+class UserRegistrationView(APIView):
+    """
+    View to handle user registration.
+    """
+    def post(self, request):
+        """Register a user
+        """
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            user =  serializer.save()
+            # Generate a token for the user
+            token = Token.objects.create(user=user) # pylint: disable=no-member
+            return Response({
+                "message": "User registered successfully.",
+                "token": token.key
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

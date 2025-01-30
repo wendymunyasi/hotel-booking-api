@@ -16,12 +16,19 @@ Including another URLconf
 """
 from rest_framework.routers import DefaultRouter
 from django.urls import path, include
-from.views import RoomViewSet, BoookingViewSet
+from.views import LoginView, LogoutView, RoomViewSet, BoookingViewSet, UserRegistrationView
 
 router = DefaultRouter()
 router.register(r'rooms', RoomViewSet, basename='room')
 router.register(r'bookings', BoookingViewSet, basename='booking')
 
 urlpatterns = [
+    # Login and Logout endpoints
+    path('login/', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
+
+    # User registration endpoint
+    path('register/', UserRegistrationView.as_view(), name='register'),
+
     path('', include(router.urls)),
 ]
