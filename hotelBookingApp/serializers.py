@@ -2,6 +2,7 @@
 """
 
 from rest_framework import serializers
+from django.contrib.auth.models import User
 from .models import Room, Booking
 
 # Serializers allow complex data such as querysets and model instances to
@@ -58,3 +59,40 @@ class BookingSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("The room is already booked for the selected dates.")
 
         return data
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    """Serialzier to map the User model to the JSON format
+    Represents the User model in API responses
+    """
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+    password_confirm = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+
+    class Meta:
+        """Meta class to define the model and fields to include in the serializer.
+        """
+        model = User
+        fields = ['username', 'email', 'password', 'password_confirm']
+
+    def validate(self, data): # pylint: disable=arguments-renamed
+        """Check if passwords match
+        """
+        if data['password'] != data['password_confirm']:
+            raise serializers.ValidationError({"password": "Passwords do not match."})
+        return data
+
+    def create(self, validated_data):
+        """Create a new user
+        """
+        # Remove password_confirm from validated_data
+        validated_data.pop('password_confirm')
+        # Create the user
+        user = User.objects.create_user(**validated_data)
+        return user
