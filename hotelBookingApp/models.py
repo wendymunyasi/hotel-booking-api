@@ -2,6 +2,7 @@
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.timezone import now
 
 class Room(models.Model):
     """Represents a room in the hotel
@@ -23,17 +24,38 @@ class Room(models.Model):
         ('double', 'Double'),
         ('suite', 'Suite'),
     ]
-    room_type = models.CharField(max_length=20, choices=ROOM_TYPES)
-    price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
-    total_rooms = models.IntegerField()
-    available_rooms = models.IntegerField()
+    room_number = models.CharField(
+        max_length=10,
+        unique=True,
+        blank=True,
+        help_text="The number of the room."
+    )
+    room_type = models.CharField(
+        max_length=20,
+        choices=ROOM_TYPES,
+        help_text="The type of the room (e.g., single, double, suite)."
+    )
+    price_per_night = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="The price per night for the room."
+    )
 
     def __str__(self):
         """Returns a string representation of the Room object.
         """
         return (
-            f"{self.room_type} - {self.total_rooms} total rooms - {self.available_rooms} available"
+            f"{self.room_type} - Room number - {self.room_number}"
         )
+
+    def save(self, *args, **kwargs):
+        """
+        Automatically set the room_number to the id of the room after saving.
+        """
+        super().save(*args, **kwargs)  # Save the object to generate the id
+        if not self.room_number:  # Only set room_number if it's not already set
+            self.room_number = str(self.id)  # Set room_number to the id
+            super().save(*args, **kwargs)  # Save again to update the room_number
 
 class Booking(models.Model):
     """Represents a booking made by a user for a specific room.
@@ -51,8 +73,8 @@ class Booking(models.Model):
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    check_in_date = models.DateField()
-    check_out_date = models.DateField()
+    check_in_date = models.DateField(default=now)
+    check_out_date = models.DateField(default=now)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -66,10 +88,14 @@ class Booking(models.Model):
             ordering: Default ordering for Booking objects is by the
             'check_in_date' in ascending order.
         """
-        unique_together = ('user', 'room', 'check_in_date')
+        # Prevent double booking of the same room for the same dates
+        unique_together = ('room', 'check_in_date', 'check_out_date')
         ordering = ['check_in_date']
 
     def __str__(self):
         """Returns a string representation of the Booking object.
         """
-        return f"Room type {self.room.room_type} booked by {self.user}"
+        return (
+            f"""Room type {self.room.room_type} number {self.room.room_number} booked by {self.user.username}
+            from {self.check_in_date} to {self.check_out_date}"""
+        )
