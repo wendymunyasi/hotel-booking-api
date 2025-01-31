@@ -1,8 +1,9 @@
 """This module contains the models for the hotel booking application."""
 
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 from django.utils.timezone import now
+
 
 class Room(models.Model):
     """Represents a room in the hotel
@@ -54,7 +55,7 @@ class Room(models.Model):
         """
         super().save(*args, **kwargs)  # Save the object to generate the id
         if not self.room_number:  # Only set room_number if it's not already set
-            self.room_number = str(self.id)  # Set room_number to the id
+            self.room_number = str(self.id)  # Set room_number to the id # pylint: disable=no-member
             super().save(*args, **kwargs)  # Save again to update the room_number
 
 class Booking(models.Model):
@@ -96,6 +97,6 @@ class Booking(models.Model):
         """Returns a string representation of the Booking object.
         """
         return (
-            f"""Room type {self.room.room_type} number {self.room.room_number} booked by {self.user.username}
-            from {self.check_in_date} to {self.check_out_date}"""
+            f"""Room type {self.room.room_type} number {self.room.room_number}
+            booked by {self.user.username} from {self.check_in_date} to {self.check_out_date}""" # pylint: disable=no-member
         )

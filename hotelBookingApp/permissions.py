@@ -3,6 +3,7 @@
 
 from rest_framework.permissions import BasePermission
 
+
 class IsOwner(BasePermission):
     """
     Custom permission to allow only the owner of a booking to view it.

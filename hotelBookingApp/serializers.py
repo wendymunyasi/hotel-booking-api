@@ -1,9 +1,10 @@
 """Module for serializing the models so that they can be exposed to the API.
 """
 
-from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Room, Booking
+from rest_framework import serializers
+
+from .models import Booking, Room
 
 # Serializers allow complex data such as querysets and model instances to
 # be converted to native Python datatypes that can then be easily rendered

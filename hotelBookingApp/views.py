@@ -3,17 +3,21 @@ ViewSets automatically provides `list`, `create`, `retrieve`,
 `update` and `destroy` actions.
 """
 
-from rest_framework import viewsets, permissions, status
-from rest_framework.response import Response
-from rest_framework.decorators import action
 from django.db.models import Q
+
+from rest_framework import permissions, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Room, Booking
-from .serializers import BookingSerializer, RoomSerializer, UserRegistrationSerializer
+
+from .models import Booking, Room
 from .permissions import IsOwner
+from .serializers import (BookingSerializer, RoomSerializer,
+                          UserRegistrationSerializer)
+
 
 class RoomViewSet(viewsets.ModelViewSet):
     """A simple viewSet for viewing rooms
