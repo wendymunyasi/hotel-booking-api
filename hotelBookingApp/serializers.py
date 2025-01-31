@@ -35,12 +35,14 @@ class BookingSerializer(serializers.ModelSerializer):
     )
     check_in_date = serializers.DateField(required=True)  # Explicitly required
     check_out_date = serializers.DateField(required=True)  # Explicitly required
+    number_of_nights = serializers.SerializerMethodField()  # Custom field for number of nights
+    total_booking_price = serializers.SerializerMethodField() # Custom field for total price
 
     class Meta:
         """Meta class to define the model and fields to include in the serializer.
         """
         model = Booking
-        fields = ['id', 'room', 'room_id', 'check_in_date', 'check_out_date']
+        fields = ['id', 'room', 'room_id', 'check_in_date', 'check_out_date', 'number_of_nights', 'total_booking_price']
         read_only_fields = ['user']
 
     def validate(self, data): # pylint: disable=arguments-renamed
@@ -72,6 +74,32 @@ class BookingSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("The room is already booked for the selected dates.")
 
         return data
+
+    def get_number_of_nights(self, obj):
+        """
+        Calculate the number of nights for the booking.
+        """
+        # Calculate the number of nights
+        num_nights = (obj.check_out_date - obj.check_in_date).days
+        # If check_in_date and check_out_date are the same, assume 1 night
+        if num_nights == 0:
+            num_nights = 1
+        return num_nights
+
+
+    def get_total_booking_price(self, obj):
+        """
+        Calculate the total price of the booking based on the number of nights
+        and the room's price per night.
+        """
+        # Calculate the number of nights
+        num_nights = (obj.check_out_date - obj.check_in_date).days
+        # If check_in_date and check_out_date are the same, assume 1 night
+        if num_nights == 0:
+            num_nights = 1
+        # Multiply by the room's price per night
+        total_price = num_nights * obj.room.price_per_night
+        return total_price
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """Serialzier to map the User model to the JSON format
