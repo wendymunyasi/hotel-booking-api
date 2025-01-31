@@ -38,7 +38,7 @@ class BookingSerializer(serializers.ModelSerializer):
         """Meta class to define the model and fields to include in the serializer.
         """
         model = Booking
-        fields = ['id', 'user', 'room', 'room_id', 'check_in_date', 'check_out_date', 'created_at']
+        fields = ['id', 'room', 'room_id', 'check_in_date', 'check_out_date']
         read_only_fields = ['user']
 
     def validate(self, data): # pylint: disable=arguments-renamed
