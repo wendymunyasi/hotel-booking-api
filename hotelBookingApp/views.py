@@ -64,7 +64,7 @@ class BoookingViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsOwner] # Only logged-in users can book
     # permission_classes = [permissions.AllowAny]
 
-    def create_booking(self, serializer):
+    def perform_create(self, serializer):
         """Create a new booking and associate it with the logged-in user
         """
         # Automatically associate the booking with the logged-in user
