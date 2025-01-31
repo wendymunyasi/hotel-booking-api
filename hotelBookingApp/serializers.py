@@ -46,9 +46,26 @@ class BookingSerializer(serializers.ModelSerializer):
         Validate the booking data to ensure check-in is before check-out
         and that the room is not already booked for the selected dates.
         """
+        # Check for required fields
+        required_fields = ['room', 'check_in_date', 'check_out_date']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            raise serializers.ValidationError(
+                f"Please provide {', '.join(missing_fields)} to make your booking."
+            )
+
         # Ensure check-in is before check-out
-        if data['check_in_date'] >= data['check_out_date']:
+        if data['check_in_date'] > data['check_out_date']:
             raise serializers.ValidationError("Check-in date must be before check-out date.")
+
+
+        # Check if the exact same booking already exists
+        if Booking.objects.filter( # pylint: disable=no-member
+            room=data['room'],
+            check_in_date=data['check_in_date'],
+            check_out_date=data['check_out_date']
+        ).exists():
+            raise serializers.ValidationError("The room is already booked for the selected dates.")
 
         # Check if the room is already booked for the given dates
         overlapping_bookings = Booking.objects.filter( # pylint: disable=no-member
