@@ -53,10 +53,16 @@ class Room(models.Model):
         """
         Automatically set the room_number to the id of the room after saving.
         """
-        super().save(*args, **kwargs)  # Save the object to generate the id
-        if not self.room_number:  # Only set room_number if it's not already set
-            self.room_number = str(self.id)  # Set room_number to the id # pylint: disable=no-member
-            super().save(*args, **kwargs)  # Save again to update the room_number
+        if not self.room_number and not self.id: #pylint: disable=no-member
+            # First save to get an ID
+            super().save(*args, **kwargs)
+            # Set the room number
+            self.room_number = str(self.id) # pylint: disable=no-member
+            # Save again to update the room_number
+            super().save(*args, **kwargs)
+        else:
+            # Normal save for updates
+            super().save(*args, **kwargs)
 
 class Booking(models.Model):
     """Represents a booking made by a user for a specific room.
