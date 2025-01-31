@@ -4,7 +4,6 @@ ViewSets automatically provides `list`, `create`, `retrieve`,
 """
 
 from django.db.models import Q
-
 from rest_framework import permissions, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -29,6 +28,12 @@ class RoomViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='available')
     def available_rooms(self, request):
         """Custom endpoint to filter available rooms based on check-in and check-out dates.
+        Users can be able to filter by room type as well.
+
+        Query Parameters:
+            - room_type (Optional): The type of room (e.g., single, double, suite).
+            - check_in_date: The check-in date to filter available rooms.
+            - check_out_date: The check-out date to filter available rooms.
 
         Returns:
             list:Available rooms for the given dates and room type.
@@ -57,8 +62,6 @@ class RoomViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(available_rooms, many=True)
         return Response(serializer.data)
-
-
 
 class BoookingViewSet(viewsets.ModelViewSet):
     """A simple viewSet for viewing Bookings
