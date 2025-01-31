@@ -87,7 +87,7 @@ class Booking(models.Model):
     class Meta:
         """Metadata for the Booking model.
         """
-        ordering = ['check_in_date']
+        ordering = ['-created_at'] # Make the latest booking appear first in records
 
     def __str__(self):
         """Returns a string representation of the Booking object.
