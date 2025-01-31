@@ -33,6 +33,8 @@ class BookingSerializer(serializers.ModelSerializer):
     room_id = serializers.PrimaryKeyRelatedField(
         queryset=Room.objects.all(), source='room', write_only=True # pylint: disable=no-member
     )
+    check_in_date = serializers.DateField(required=True)  # Explicitly required
+    check_out_date = serializers.DateField(required=True)  # Explicitly required
 
     class Meta:
         """Meta class to define the model and fields to include in the serializer.
@@ -46,13 +48,6 @@ class BookingSerializer(serializers.ModelSerializer):
         Validate the booking data to ensure check-in is before check-out
         and that the room is not already booked for the selected dates.
         """
-        # Check for required fields
-        required_fields = ['room', 'check_in_date', 'check_out_date']
-        missing_fields = [field for field in required_fields if field not in data]
-        if missing_fields:
-            raise serializers.ValidationError(
-                f"Please provide {', '.join(missing_fields)} to make your booking."
-            )
 
         # Ensure check-in is before check-out
         if data['check_in_date'] > data['check_out_date']:
