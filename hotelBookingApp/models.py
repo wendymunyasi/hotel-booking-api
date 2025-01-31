@@ -86,17 +86,7 @@ class Booking(models.Model):
 
     class Meta:
         """Metadata for the Booking model.
-
-        Constraints:
-            unique_together: Ensures that a user cannot book the same room
-            for the same check-in date more than once.
-
-        Options:
-            ordering: Default ordering for Booking objects is by the
-            'check_in_date' in ascending order.
         """
-        # Prevent double booking of the same room for the same dates
-        unique_together = ('room', 'check_in_date', 'check_out_date')
         ordering = ['check_in_date']
 
     def __str__(self):
