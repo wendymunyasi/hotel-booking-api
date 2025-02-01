@@ -123,3 +123,42 @@ class Booking(models.Model):
             f"""Room type {self.room.room_type} number {self.room.room_number}
             booked by {self.user.username} from {self.check_in_date} to {self.check_out_date}""" # pylint: disable=no-member
         )
+
+
+class Payment(models.Model):
+    """Represents a payment made for a specific booking.
+
+    This model stores the payment details for a booking, including the card information
+    (masked for security), the payment amount, and the timestamp when the payment was created.
+
+    Attributes:
+        booking: Each booking can have only one payment.
+        card_number (CharField): The card number used for the payment.
+        card_expiry (CharField): The expiry date of the card in the format MM/YY.
+        cvv (CharField): The CVV (Card Verification Value) of the card.
+        amount (DecimalField): The total amount paid for the booking.
+        created_at (DateTimeField): The timestamp when the payment was created.
+
+    Returns:
+        str: A string representation of the payment.
+    """
+    booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name='payment')
+    card_number = models.CharField(max_length=20, help_text="Enter card number")
+    card_expiry = models.CharField(max_length=5, help_text=" Format: MM, YY")
+    card_cvv = models.CharField(max_length=3, help_text=" Format: 3 digits")
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+    def save(self, *args, **kwargs):
+        """
+        Override the save method to strip the extra characters from card number.
+        """
+        self.card_number = self.card_number.strip()  # Remove any extra spaces or newlines
+        super().save(*args, **kwargs)
+
+
+    def __str__(self):
+        """Returns a string representation of the Payment object.
+        """
+        return f"Payment for Booking {self.booking.id} - Amount: {self.amount}" # pylint: disable=no-member
