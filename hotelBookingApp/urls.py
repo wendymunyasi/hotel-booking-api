@@ -17,7 +17,7 @@ Including another URLconf
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from.views import LoginView, LogoutView, RoomViewSet, BoookingViewSet, UserRegistrationView
+from.views import LoginView, LogoutView, RoomViewSet, BoookingViewSet, UserRegistrationView, PaymentViewSet
 
 router = DefaultRouter()
 router.register(r'rooms', RoomViewSet, basename='room')
@@ -30,6 +30,6 @@ urlpatterns = [
 
     # User registration endpoint
     path('register/', UserRegistrationView.as_view(), name='register'),
-
+    path('bookings/<int:booking_id>/payments/', PaymentViewSet.as_view({'post': 'create'}), name='payment-create'),
     path('', include(router.urls)),
 ]
