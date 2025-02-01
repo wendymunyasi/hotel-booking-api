@@ -4,7 +4,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Booking, Room
+from .models import Booking, Payment, Room
 
 # Serializers allow complex data such as querysets and model instances to
 # be converted to native Python datatypes that can then be easily rendered
@@ -132,3 +132,36 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
+
+class PaymentSerializer(serializers.ModelSerializer):
+    """Serialzier to map the Payment model to the JSON format
+    Represents the Payment model in API responses
+    """
+    class Meta:
+        """Meta class to define the model and fields to include in the serializer.
+        """
+        model = Payment
+        fields = ['id', 'booking', 'card_number', 'card_expiry', 'card_cvv', 'amount', 'created_at']
+        read_only_fields = ['id', 'booking', 'amount', 'created_at']
+
+    def create(self, validated_data):
+        """
+        Create a new Payment instance and returns it with masked card details.
+        Overrides the default `create` method to mask the card number
+        """
+        validated_data['card_number'] = f"**** **** **** {validated_data['card_number'][-4:]}"
+        return super().create(validated_data)
+
+    def validate_card_number(self, value):
+        """Ensures card number is 16 digits
+        """
+        if not value.isdigit() or len(value) != 16:
+            raise serializers.ValidationError("Card number must be 16 digits.")
+        return value
+
+    def validate_card_cvv(self, value):
+        """Ensures CVV is 3 digits
+        """
+        if not value.isdigit() or len(value) != 3:
+            raise serializers.ValidationError("CVV must be 3 digits.")
+        return value
