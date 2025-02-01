@@ -12,10 +12,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Booking, Room
+from .models import Booking, Payment, Room
 from .permissions import IsOwner
 from .serializers import (BookingSerializer, RoomSerializer,
-                          UserRegistrationSerializer)
+                          UserRegistrationSerializer, PaymentSerializer)
 
 
 class RoomViewSet(viewsets.ModelViewSet):
@@ -131,3 +131,52 @@ class UserRegistrationView(APIView):
                 "token": token.key
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PaymentViewSet(viewsets.ModelViewSet):
+    """A simple viewSet for viewing Payments
+    """
+    queryset = Payment.objects.all() # pylint: disable=no-member
+    serializer_class = PaymentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        """Create a payment for a specific booking.
+        """
+        booking_id = kwargs.get('booking_id')
+        try:
+            # Retrieve the booking object and user
+            booking = Booking.objects.get(id=booking_id, user=request.user) # pylint: disable=no-member
+        except Booking.DoesNotExist: # pylint: disable=no-member
+            return Response(
+                {"error": "Booking not found or not authorized."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Check if the payment is already completed
+        if booking.payment_status == 'completed':
+            return Response(
+                {"error": "Payment already completed for this booking."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate the payment data
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Inject the booking and amount into the validated data
+        validated_data = serializer.validated_data
+        validated_data['booking'] = booking
+        validated_data['amount'] = booking.room.price_per_night  # Get the price from the room
+
+        # Dummy payment processing logic
+        payment_successful = True  # Simulate payment success
+        if payment_successful:
+            serializer.save(booking=booking, amount=booking.room.price_per_night)
+            booking.payment_status = 'completed'
+            booking.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            booking.payment_status = 'failed'
+            booking.save()
+            return Response({"error": "Payment failed."}, status=status.HTTP_400_BAD_REQUEST)
