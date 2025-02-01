@@ -78,16 +78,43 @@ class Booking(models.Model):
        __str__(): Returns a string representation of the booking, including
        the username and room type.
     """
+    PAYMENT_STATUS = [
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     check_in_date = models.DateField(default=now)
     check_out_date = models.DateField(default=now)
+    total_booking_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
+    payment_status = models.CharField(
+        max_length=10,
+        choices = PAYMENT_STATUS,
+        default='pending'
+    )
 
     class Meta:
         """Metadata for the Booking model.
         """
         ordering = ['-created_at'] # Make the latest booking appear first in records
+
+    def save(self, *args, **kwargs):
+        """
+        Override the save method to calculate the total_booking_price before saving.
+        """
+        if self.check_in_date and self.check_out_date and self.room:
+            num_nights = (self.check_out_date - self.check_in_date).days
+            if num_nights == 0:
+                num_nights = 1
+            self.total_booking_price = num_nights * self.room.price_per_night # pylint: disable=no-member
+        super().save(*args, **kwargs)
 
     def __str__(self):
         """Returns a string representation of the Booking object.
