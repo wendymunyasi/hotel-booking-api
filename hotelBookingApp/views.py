@@ -14,8 +14,8 @@ from rest_framework.views import APIView
 
 from .models import Booking, Payment, Room
 from .permissions import IsOwner
-from .serializers import (BookingSerializer, RoomSerializer,
-                          UserRegistrationSerializer, PaymentSerializer)
+from .serializers import (BookingSerializer, PaymentSerializer, RoomSerializer,
+                          UserRegistrationSerializer)
 
 
 class RoomViewSet(viewsets.ModelViewSet):
