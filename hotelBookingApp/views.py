@@ -65,8 +65,21 @@ class RoomViewSet(viewsets.ModelViewSet):
         if room_type:
             available_rooms = available_rooms.filter(room_type=room_type)
 
+        # Serialize the available rooms
         serializer = self.get_serializer(available_rooms, many=True)
-        return Response(serializer.data)
+        data = serializer.data
+
+        # Group rooms by room_type using a dictionary
+        grouped_data = {}
+        for room in data:
+            room_type = room["room_type"]
+            if room_type not in grouped_data:
+                grouped_data[room_type] = []
+            grouped_data[room_type].append(room)
+
+        # Return the grouped data
+        return Response(grouped_data)
+
 
 class BoookingViewSet(viewsets.ModelViewSet):
     """A simple viewSet for viewing Bookings
@@ -89,6 +102,32 @@ class BoookingViewSet(viewsets.ModelViewSet):
         # Allow users to view only their own bookings
         return self.queryset.filter(user=self.request.user)
 
+    def create(self, request, *args, **kwargs):
+        """Override the create method to return a custom success message
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            {
+                "data": serializer.data,
+                "message": "Booking created successfully."
+            },
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        """Override the destroy method to return a custom success message
+        """
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(
+            {"message": "Booking deleted successfully."},
+            status=status.HTTP_200_OK
+        )
+
 # Login View
 class LoginView(ObtainAuthToken):
     """
@@ -101,9 +140,12 @@ class LoginView(ObtainAuthToken):
         token = Token.objects.get(key=response.data['token']) # pylint: disable=no-member
         return Response(
             {
-                'token': token.key,
-                'user_id': token.user_id,
-                'username': token.user.username
+                'data': {
+                    'token': token.key,
+                    'user_id': token.user_id,
+                    'username': token.user.username,
+                },
+                'message': 'Login successful'
             }
         )
 
@@ -181,7 +223,13 @@ class PaymentViewSet(viewsets.ModelViewSet):
             serializer.save(booking=booking, amount=booking.room.price_per_night)
             booking.payment_status = 'completed'
             booking.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(
+                {
+                "data": serializer.data,
+                "message": "Payment completed successfully."
+                },
+                status=status.HTTP_201_CREATED
+            )
         else:
             booking.payment_status = 'failed'
             booking.save()
