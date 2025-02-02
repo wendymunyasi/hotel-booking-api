@@ -44,9 +44,14 @@ class RoomViewSet(viewsets.ModelViewSet):
 
         if not check_in_date or not check_out_date:
             return Response(
-                {"error": "Please provide both check_in_date and check_out_date dates."},
-                status=400
+        {
+            "error": (
+                "Please provide both check_in_date and check_out_date. You can also "
+                "provide room_type if you want to filter by room type."
             )
+        },
+        status=400
+    )
 
         # Filter rooms NOT booked for the given date range using Booking Model
         booked_rooms = Booking.objects.filter( # pylint: disable=no-member
@@ -70,6 +75,7 @@ class BoookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner] # Only logged-in users can book
     # permission_classes = [permissions.AllowAny]
+    http_method_names = ['get', 'post','delete'] # Only allow get requests
 
     def perform_create(self, serializer):
         """Create a new booking and associate it with the logged-in user
