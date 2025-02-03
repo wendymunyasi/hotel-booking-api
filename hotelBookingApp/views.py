@@ -99,6 +99,29 @@ class RoomViewSet(viewsets.ModelViewSet):
         return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
 
 
+    def list(self, request, *args, **kwargs):
+        """Override the list method to include room counts.
+        """
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+
+        # Count rooms by type
+        total_rooms = queryset.count()
+        single_rooms = queryset.filter(room_type="single").count()
+        double_rooms = queryset.filter(room_type="double").count()
+        suite_rooms = queryset.filter(room_type="suite").count()
+
+        # Add counts to the response
+        response_data = {
+            "TOTAL ROOMS": total_rooms,
+            "Single Rooms": single_rooms,
+            "Double Rooms": double_rooms,
+            "Suites Rooms": suite_rooms,
+            "rooms": serializer.data,
+        }
+        return Response(response_data)
+
+
 class BoookingViewSet(viewsets.ModelViewSet):
     """A simple viewSet for viewing Bookings
     """
