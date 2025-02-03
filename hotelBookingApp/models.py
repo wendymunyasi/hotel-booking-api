@@ -41,6 +41,12 @@ class Room(models.Model):
         decimal_places=2,
         help_text="The price per night for the room."
     )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        """Metadata for the Rooms model.
+        """
+        ordering = ['-created_at'] # Make the latest room appear first in records
 
     def __str__(self):
         """Returns a string representation of the Room object.
