@@ -24,6 +24,7 @@ class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all() # pylint: disable=no-member
     serializer_class = RoomSerializer
     permission_classes = [permissions.AllowAny] # All users can view rooms
+    http_method_names = ['get'] # Only allow get requests
 
     @action(detail=False, methods=['get'], url_path='available')
     def available_rooms(self, request):
@@ -88,7 +89,7 @@ class BoookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner] # Only logged-in users can book
     # permission_classes = [permissions.AllowAny]
-    http_method_names = ['get', 'post','delete'] # Only allow get requests
+    http_method_names = ['get', 'post','delete'] # Only allow these requests
 
     def perform_create(self, serializer):
         """Create a new booking and associate it with the logged-in user
