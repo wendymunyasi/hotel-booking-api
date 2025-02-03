@@ -2,7 +2,72 @@
 
 This is a web api that allows users to book reseravations, check room availability, and also cancel a reservation.
 
-## Demo and documentation
+# Creating a Room for booking
+
+Create a room for booking only in the admin panel. Check the image below for how the admin panel looks like. Follow these steps to create a room:
+
+1. Navigate to the url `http://localhost:8000/admin/hotelBookingApp/room/add/`.
+2. Log in with superuser credentials. (If you have no credentials then create one with the steps provided below in this document.)
+3. Click the `+Add` icon in the left side of the admin panel next to `Rooms`.
+4. Leave `Room number` blank as it will be automatically assigned upon creation.
+5. Select `Room type` and enter the `Price per night` for the room, then save.
+6. Proceed to now test the application via postman or whichever means you prefer.
+
+See image below. Steps for creating a superuser are provided after this image.
+
+# Admin Panel image
+
+<img src="admin.png">
+
+# Steps to Create a Superuser in Django
+
+Follow these steps to create a superuser in your Django project:
+
+1. **Activate the Virtual Environment** (if applicable):
+
+   - If your project uses a virtual environment, activate it first.
+   - Example:
+     ```bash
+     source venv/bin/activate  # On Linux/Mac
+     venv\Scripts\activate     # On Windows
+     ```
+
+2. **Run the Django Management Command**:
+
+   - Navigate to your project directory (where `manage.py` is located).
+   - Run the following command:
+     ```bash
+     python3 manage.py createsuperuser
+     ```
+
+3. **Provide Superuser Details**:
+
+   - You will be prompted to enter the following details:
+     - **Username**: Enter a username for the superuser.
+     - **Email Address**: Enter an email address (optional, depending on your configuration).
+     - **Password**: Enter a secure password and confirm it.
+
+4. **Verify Superuser Creation**:
+
+   - If the details are valid, the superuser will be created successfully.
+   - Example output:
+     ```
+     Superuser created successfully.
+     ```
+
+5. **Log in to the Admin Panel**:
+   - Start the development server:
+     ```bash
+     python manage.py runserver
+     ```
+   - Open your browser and go to `http://127.0.0.1:8000/admin/`.
+   - Log in using the superuser credentials you just created.
+
+---
+
+That's it! You now have a superuser account to manage your Django project.
+
+## Documentation
 
 - Documentation: [docs](https://documenter.getpostman.com/view/10693271/2sAYX3rP6u)
 
