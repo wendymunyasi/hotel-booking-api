@@ -52,7 +52,8 @@ class BookingSerializer(serializers.ModelSerializer):
             'number_of_nights',
             'total_booking_price',
             'payment_status']
-        read_only_fields = ['user', 'id', 'payment_status', 'total_booking_price', 'number_of_nights']
+        read_only_fields = ['user', 'id', 'payment_status', 'total_booking_price',
+                            'number_of_nights']
 
     def validate(self, data): # pylint: disable=arguments-renamed
         """
