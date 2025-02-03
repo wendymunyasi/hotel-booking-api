@@ -21,7 +21,7 @@ class RoomSerializer(serializers.ModelSerializer):
         """Meta class to define the model and fields to include in the serializer.
         """
         model = Room
-        fields = ['room_number', 'room_type', 'price_per_night']
+        fields = ['id', 'room_type', 'price_per_night']
 
 class BookingSerializer(serializers.ModelSerializer):
     """

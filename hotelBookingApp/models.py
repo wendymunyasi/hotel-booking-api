@@ -15,6 +15,7 @@ class Room(models.Model):
         hotel.
         available_rooms (int): The number of rooms of this type currently
         available for booking.
+        created_at (datetime): The timestamp when the room was created.
 
     Returns:
         __str__(): Returns a string representation of the room, including
@@ -25,12 +26,6 @@ class Room(models.Model):
         ('double', 'Double'),
         ('suite', 'Suite'),
     ]
-    room_number = models.CharField(
-        max_length=10,
-        unique=True,
-        blank=True,
-        help_text="The number of the room."
-    )
     room_type = models.CharField(
         max_length=20,
         choices=ROOM_TYPES,
@@ -52,23 +47,9 @@ class Room(models.Model):
         """Returns a string representation of the Room object.
         """
         return (
-            f"{self.room_type} - Room number - {self.room_number}"
+            f"{self.room_type} - Room number - {self.id}" #pylint: disable=no-member
         )
 
-    def save(self, *args, **kwargs):
-        """
-        Automatically set the room_number to the id of the room after saving.
-        """
-        if not self.room_number and not self.id: #pylint: disable=no-member
-            # First save to get an ID
-            super().save(*args, **kwargs)
-            # Set the room number
-            self.room_number = str(self.id) # pylint: disable=no-member
-            # Save again to update the room_number
-            super().save(*args, **kwargs)
-        else:
-            # Normal save for updates
-            super().save(*args, **kwargs)
 
 class Booking(models.Model):
     """Represents a booking made by a user for a specific room.
@@ -79,6 +60,8 @@ class Booking(models.Model):
         check_in_date (date): The check-in date for the booking.
         check_out_date (date): The check-out date for the booking.
         created_at (datetime): The timestamp when the booking was created.
+        total_booking_price (Decimal): The total price of the booking.
+        payment_status (string): The payment status of the booking.
 
     Returns:
        __str__(): Returns a string representation of the booking, including
@@ -126,7 +109,7 @@ class Booking(models.Model):
         """Returns a string representation of the Booking object.
         """
         return (
-            f"""Room type {self.room.room_type} number {self.room.room_number}
+            f"""Room type - {self.room.room_type} - number {self.room.id}
             booked by {self.user.username} from {self.check_in_date} to {self.check_out_date}""" # pylint: disable=no-member
         )
 

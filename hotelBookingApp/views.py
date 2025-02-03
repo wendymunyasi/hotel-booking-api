@@ -24,7 +24,7 @@ class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all() # pylint: disable=no-member
     serializer_class = RoomSerializer
     permission_classes = [permissions.AllowAny] # All users can view rooms
-    http_method_names = ['get'] # Only allow get requests
+    # http_method_names = ['get'] # Only allow get requests
 
     @action(detail=False, methods=['get'], url_path='available')
     def available_rooms(self, request):
@@ -80,6 +80,23 @@ class RoomViewSet(viewsets.ModelViewSet):
 
         # Return the grouped data
         return Response(grouped_data)
+
+
+    def create(self, request, *args, **kwargs):
+        """Override the create method to customize the response
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer) # Call the serializer create method
+        headers = self.get_success_headers(serializer.data)
+
+        # Customize the response data
+        response_data = {
+            "message": "Room created successfully. Well done, champ!",
+            "data": serializer.data
+        }
+
+        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class BoookingViewSet(viewsets.ModelViewSet):
