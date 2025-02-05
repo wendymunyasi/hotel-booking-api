@@ -12,19 +12,19 @@ You need to install the following software/technologies to have the app running 
 
 | Software                      | Installation Instructions/Terminal Commands      |
 | ----------------------------- | ------------------------------------------------ |
-| Python3.8                     | 1. sudo apt-get update                           |
-|                               | 2. sudo apt-get install python3.8                |
+| Python3.12                    | 1. sudo apt-get update                           |
+|                               | 2. sudo apt-get install python3.12                |
 | Virtual Environment           | 1. Python3 -m venv venv                          |
 |                               | 2. Activate by running: source venv/bin/activate |
 | Pip                           | pip install --upgrade pip                        |
-| Django 4.2.18                 | pip install Django                               |
+| Django 5.1                    | pip install Django                               |
 | djangorestframework           | pip install djangorestframework                  |
 | djangorestframework.authtoken | pip install djangorestframework.authtoken        |
 | Pyscopg2-binary               | pip install psycopg2-binary                      |
 
 ## Built With
 
-- [Django] - 4.2 (https://docs.djangoproject.com/en/4.2/)
+- [Django] - 5.1 (https://docs.djangoproject.com/en/5.1/)
 
 ## Contributing
 
