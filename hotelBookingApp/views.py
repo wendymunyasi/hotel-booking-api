@@ -4,6 +4,7 @@ ViewSets automatically provides `list`, `create`, `retrieve`,
 """
 
 from django.db.models import Q
+from drf_spectacular.utils import extend_schema
 from rest_framework import permissions, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -14,8 +15,12 @@ from rest_framework.views import APIView
 
 from .models import Booking, Payment, Room
 from .permissions import IsOwner
-from .serializers import (BookingSerializer, PaymentSerializer, RoomSerializer,
-                          UserRegistrationSerializer)
+from .serializers import (
+    BookingSerializer,
+    PaymentSerializer,
+    RoomSerializer,
+    UserRegistrationSerializer,
+)
 
 
 class RoomViewSet(viewsets.ModelViewSet):
@@ -170,6 +175,7 @@ class BoookingViewSet(viewsets.ModelViewSet):
         )
 
 # Login View
+@extend_schema(tags=["authentication"])
 class LoginView(ObtainAuthToken):
     """
     View to handle user login and return an authentication token.
@@ -191,6 +197,7 @@ class LoginView(ObtainAuthToken):
         )
 
 # Logout View
+@extend_schema(tags=["authentication"])
 class LogoutView(APIView):
     """
     View to handle user logout by deleting their authentication token.
@@ -203,6 +210,7 @@ class LogoutView(APIView):
         request.user.auth_token.delete()
         return Response({"message": "Logged out successfully."})
 
+@extend_schema(tags=["authentication"])
 class UserRegistrationView(APIView):
     """
     View to handle user registration.
@@ -222,6 +230,8 @@ class UserRegistrationView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+@extend_schema(tags=["payments"])
 class PaymentViewSet(viewsets.ModelViewSet):
     """A simple viewSet for viewing Payments
     """
